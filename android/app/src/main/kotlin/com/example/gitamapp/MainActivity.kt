@@ -1,4 +1,4 @@
-package com.example.gitamapp
+package com.sansh.gitamapp
 
 import io.flutter.embedding.android.FlutterActivity
 
