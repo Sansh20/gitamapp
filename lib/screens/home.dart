@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
-import 'package:async/async.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -23,31 +22,26 @@ class _HomeState extends State<Home> {
   _HomeState({this.cookie});
 
   String url='https://glearn.gitam.edu/student';
-  String attendance;
+  Future attendanceFut;
 
-  final AsyncMemoizer _welcomeMemoizer = AsyncMemoizer();
-  final AsyncMemoizer _attendanceMemoizer = AsyncMemoizer();
+  Future document;
     
-  parseHtml() {
-    
-    return this._welcomeMemoizer.runOnce(() async{
+  parseHtml() async {
+      print(cookie[0]);
       http.Response response = await http.get(url+'/welcome.aspx',
         headers: {'Cookie': cookie[0].toString()+';Expiry=Session'}
       );
       dom.Document doc = parser.parse(response.body);
       print("CALLED");
       return doc;
-    });
   }
 
   getAttendance() async{
-    return this._attendanceMemoizer.runOnce(() async{
       http.Response response = await http.get(url+'/attendance.aspx',
         headers: {'Cookie': cookie[0].toString()+';Expiry=Session'}
       );
       dom.Document doc = parser.parse(response.body);
       return doc.getElementById('ContentPlaceHolder1_lblpercent').text.toString();
-    });
   }
 
   @override
@@ -62,12 +56,12 @@ class _HomeState extends State<Home> {
             String nameFromSite = snapshot.data.getElementById('lblname').text.toString();
             List nameInParts = nameFromSite.split(' ');
             String name='';
+            print(nameInParts);
             for(String i in nameInParts){
               name+=i[0]+i.substring(1, i.length).toLowerCase();
               name+=' ';
             }
-            getAttendance().then((value)=>setState(()=>attendance=value));
-            
+            var assignments = snapshot.data.getElementById('ContentPlaceHolder1_GridView1').getElementsByClassName('main_li');
             return SingleChildScrollView(
               child: Align(
                 alignment: Alignment.center,
@@ -113,33 +107,64 @@ class _HomeState extends State<Home> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Tile(
-                          widget: CircularPercentIndicator(
-                            radius: 80.0,
-                            lineWidth: 10.0,
-                            animation: true,
-                            percent: double.parse(attendance)/100,
-                            progressColor: Color(0xFF2a9d8f),
-                            circularStrokeCap: CircularStrokeCap.round,
-                            center: Text(attendance+'%',
+                          widget: FutureBuilder(
+                            future: getAttendance(),
+                            builder: (context, attendance){
+                              if(attendance.hasData){
+                                return CircularPercentIndicator(
+                                  radius: 80.0,
+                                  lineWidth: 10.0,
+                                  animation: true,
+                                  percent: double.parse(attendance.data)/100,
+                                  progressColor: Color(0xFF2a9d8f),
+                                  circularStrokeCap: CircularStrokeCap.round,
+                                  center: Text(attendance.data+'%',
+                                    style: GoogleFonts.montserrat(
+                                      color: Color(0xFF2a9d8f),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 20
+                                    ),
+                                  ),
+                                  footer: Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Text('Attendance',
+                                      style: GoogleFonts.montserrat(
+                                        color: Color(0xFF2a9d8f),
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 20
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                              else{
+                                return Tile(widget: Text('Loading'));
+                              }
+                            }
+                          )),
+                        Padding(padding: const EdgeInsets.only(left: 10, right: 10),),
+                        Tile(widget: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              assignments.length.toString(),
+                              style: GoogleFonts.montserrat(
+                                color: Color(0xFF2a9d8f),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 42
+                              ),
+                            ),
+                            Text(
+                              'Assignments Left',
                               style: GoogleFonts.montserrat(
                                 color: Color(0xFF2a9d8f),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 20
                               ),
+                              textAlign: TextAlign.center,
                             ),
-                            footer: Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Text('Attendance',
-                              style: GoogleFonts.montserrat(
-                                color: Color(0xFF2a9d8f),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 20
-                              ),
-                            ),
-                            ),
-                          ),
-                        ),
-                        Tile(widget: Text('Yes'))
+                          ],
+                        ))
                       ],
                     )
                   ],
@@ -148,7 +173,6 @@ class _HomeState extends State<Home> {
             );
           }
           else{
-            print('Loading');
             return Center(child: Text("Loading"));
           }
         },
