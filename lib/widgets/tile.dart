@@ -7,7 +7,7 @@ class Tile extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: ()=>(onPressedFunction()!=null)? onPressedFunction() : null,
+      onTap: ()=>(onPressedFunction()!=null)? onPressedFunction() : (){},
       child: Container(
         width: 150,
         height: 150,

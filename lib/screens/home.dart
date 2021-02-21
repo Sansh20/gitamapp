@@ -7,6 +7,7 @@ import 'package:gitamapp/widgets/tile.dart';
 import 'package:gitamapp/widgets/elementTile.dart';
 import 'package:gitamapp/screens/attendance.dart';
 import 'package:gitamapp/screens/assignments.dart';
+import 'package:gitamapp/screens/timetable.dart';
 import 'package:gitamapp/services/pages.dart';
 
 
@@ -145,8 +146,9 @@ class _HomeState extends State<Home> {
                     Padding(
                       padding: const EdgeInsets.only(top: 26, bottom: 13),
                       child: ElementTile(
+                        onPressedFunction: ()=> Navigator.push(context, MaterialPageRoute(builder: (context)=> TimeTable())),
                         widget: Text(
-                          'Courses',
+                          'Time Table',
                           style: textStyle26
                         ),
                         height: 80,
@@ -182,7 +184,16 @@ class _HomeState extends State<Home> {
                         ],
                       )
                     ),
-                    Padding(padding: const EdgeInsets.only(top:10))
+                    Padding(padding: const EdgeInsets.only(top:10)),
+                    Text(
+                      "Developed by Sanyam Sharma",
+                      style: GoogleFonts.montserrat(
+                        color: Color(0xFF2a9d8f),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14
+                      ),
+                    ),
+                    Padding(padding: const EdgeInsets.only(top:10)),
                   ],
                 ),
               ),

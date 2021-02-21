@@ -76,6 +76,9 @@ class _LoginState extends State<Login> {
                     // if(url=="https://login.gitam.edu/studentapps.aspx"){
                     //   _controller.loadUrl("http://glearn.gitam.edu/student/welcome.aspx");
                     // }
+                    if(url=="https://gstudent.gitam.edu/Welcome"){
+                      _controller.goBack();
+                    }
                     if(url=="http://glearn.gitam.edu/student/welcome.aspx"){
                       Navigator.push(context, MaterialPageRoute(builder: (context) => Home()),);
                     }
@@ -87,7 +90,7 @@ class _LoginState extends State<Login> {
           Padding(padding: const EdgeInsets.only(top: 20),),
           Container(
             width: size.width/1.2,
-            child: Text('You will be taken to another screen in a while', style: GoogleFonts.montserrat(
+            child: Text('Tip: After logging in Click on "Glearn" and you will be taken to another screen in a while', style: GoogleFonts.montserrat(
               color: Color(0xFFFF9B52),
               fontWeight: FontWeight.w300,
               fontSize: 18,

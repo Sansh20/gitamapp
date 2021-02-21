@@ -9,7 +9,7 @@ class ElementTile extends StatelessWidget{
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return GestureDetector(
-      onTap: ()=>(onPressedFunction())!=null? onPressedFunction():null,
+      onTap: ()=>(onPressedFunction()!=null)? onPressedFunction() : (){},
       child: Container(
         width: size.width/1.15,
         height: (height!=null)?height:100,
@@ -39,13 +39,14 @@ class ElementTile extends StatelessWidget{
 class DisabledElementTile extends StatelessWidget{
   final Widget widget;
   final double width;
-  DisabledElementTile({@required this.widget, this.width});
+  final double height;
+  DisabledElementTile({@required this.widget, this.width, this.height});
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Container(
       width: (width==null) ? size.width/1.15 : width,
-      height: 120,
+      height: (height==null) ? 120 : height,
       decoration: BoxDecoration(
         color: Color(0xFF152E52),
         boxShadow: [

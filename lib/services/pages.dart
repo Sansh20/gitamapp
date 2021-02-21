@@ -23,4 +23,11 @@ class Pages{
     dom.Document doc = parser.parse(response.body);
     return doc;
   }
+  getTimeTable() async{
+    http.Response response = await http.get(url+'/mytimetable.aspx',
+      headers: {'Cookie': cookieFinal}
+    );
+    dom.Document doc = parser.parse(response.body);
+    return doc;
+  }
 }
