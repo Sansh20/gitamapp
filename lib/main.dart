@@ -1,13 +1,18 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+
 import 'package:google_fonts/google_fonts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:gitamapp/screens/home.dart';
 import 'package:webview_cookie_manager/webview_cookie_manager.dart';
 
+import 'package:gitamapp/screens/home.dart';
+import 'package:gitamapp/services/cookie_global.dart' as cookiesGlobal;
+
 void main() {
-  runApp(MaterialApp(home:Login()));
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home:Login()
+  ));
 }
 
 class Login extends StatefulWidget {
@@ -50,8 +55,9 @@ class _LoginState extends State<Login> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black,
+                    color: Color.fromRGBO(0, 0, 0, 0.8),
                     blurRadius: 10,
+                    spreadRadius: 1,
                     offset: Offset(1.0, 1.0),
                   )
                 ]
@@ -66,16 +72,14 @@ class _LoginState extends State<Login> {
                   },                  
                   onPageStarted: (url) async {
                     final gotCookies = await cookieManager.getCookies(url);
+                    cookiesGlobal.glearnCookie = gotCookies[0].toString();
                     // if(url=="https://login.gitam.edu/studentapps.aspx"){
                     //   _controller.loadUrl("http://glearn.gitam.edu/student/welcome.aspx");
                     // }
-                    print(gotCookies);
                     if(url=="http://glearn.gitam.edu/student/welcome.aspx"){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => Home(cookie:gotCookies)),);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => Home()),);
                     }
-                  },
-
-                      
+                  },                      
                 ),
               ),
             ),
