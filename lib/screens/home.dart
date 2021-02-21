@@ -1,62 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart' as parser;
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 import 'package:gitamapp/widgets/tile.dart';
+import 'package:gitamapp/widgets/elementTile.dart';
+import 'package:gitamapp/screens/attendance.dart';
+import 'package:gitamapp/screens/assignments.dart';
+import 'package:gitamapp/services/pages.dart';
 
 
 
 class Home extends StatefulWidget {
-  final List cookie;
-  Home({this.cookie});
   @override
-  _HomeState createState() => _HomeState(cookie:cookie);
+  _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  final List cookie;
-  _HomeState({this.cookie});
-
-  String url='https://glearn.gitam.edu/student';
-  Future attendanceFut;
-
-  Future document;
-    
-  parseHtml() async {
-      print(cookie[0]);
-      http.Response response = await http.get(url+'/welcome.aspx',
-        headers: {'Cookie': cookie[0].toString()+';Expiry=Session'}
-      );
-      dom.Document doc = parser.parse(response.body);
-      print("CALLED");
-      return doc;
-  }
-
-  getAttendance() async{
-      http.Response response = await http.get(url+'/attendance.aspx',
-        headers: {'Cookie': cookie[0].toString()+';Expiry=Session'}
-      );
-      dom.Document doc = parser.parse(response.body);
-      return doc.getElementById('ContentPlaceHolder1_lblpercent').text.toString();
-  }
+  TextStyle textStyle26 = GoogleFonts.montserrat(color: Color(0xFF2a9d8f), fontWeight: FontWeight.w600, fontSize: 26);
+  TextStyle textStyle20 = GoogleFonts.montserrat(color: Color(0xFF2a9d8f), fontWeight: FontWeight.w600, fontSize: 20);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF1D3557),
       body: FutureBuilder(
-        future: parseHtml(),
+        future: Pages().getWelcome(),
         builder: (context, AsyncSnapshot snapshot) {
           if(snapshot.hasData){
             String img = snapshot.data.getElementById('imgempid').attributes['src'].toString();
             String nameFromSite = snapshot.data.getElementById('lblname').text.toString();
             List nameInParts = nameFromSite.split(' ');
             String name='';
-            print(nameInParts);
             for(String i in nameInParts){
               name+=i[0]+i.substring(1, i.length).toLowerCase();
               name+=' ';
@@ -69,7 +44,7 @@ class _HomeState extends State<Home> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(top:40.0),
+                      padding: const EdgeInsets.only(top:34.0),
                       child: Container(
                         height: 170,
                         width: 170,
@@ -92,7 +67,7 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                     ),
-                    Padding(padding: const EdgeInsets.only(top: 20)),
+                    Padding(padding: const EdgeInsets.only(top: 18)),
                     Text(
                       name, 
                       style: GoogleFonts.montserrat(
@@ -102,48 +77,52 @@ class _HomeState extends State<Home> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    Padding(padding: const EdgeInsets.only(top: 30),),
+                    Padding(padding: const EdgeInsets.only(top: 20),),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Tile(
+                          onPressedFunction: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => Attendance()));
+                          },
                           widget: FutureBuilder(
-                            future: getAttendance(),
+                            future: Pages().getAttendance(),
                             builder: (context, attendance){
                               if(attendance.hasData){
+                                String attendanceVal = attendance.data.getElementById('ContentPlaceHolder1_lblpercent').text.toString();
                                 return CircularPercentIndicator(
                                   radius: 80.0,
                                   lineWidth: 10.0,
                                   animation: true,
-                                  percent: double.parse(attendance.data)/100,
+                                  percent: double.parse(attendanceVal)/100,
                                   progressColor: Color(0xFF2a9d8f),
                                   circularStrokeCap: CircularStrokeCap.round,
-                                  center: Text(attendance.data+'%',
-                                    style: GoogleFonts.montserrat(
-                                      color: Color(0xFF2a9d8f),
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 20
-                                    ),
+                                  center: Text(attendanceVal+'%',
+                                    style: textStyle20,
                                   ),
                                   footer: Padding(
                                     padding: const EdgeInsets.only(top: 8.0),
                                     child: Text('Attendance',
-                                      style: GoogleFonts.montserrat(
-                                        color: Color(0xFF2a9d8f),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 20
-                                      ),
+                                      style: textStyle20,
                                     ),
                                   ),
                                 );
                               }
                               else{
-                                return Tile(widget: Text('Loading'));
+                                return CircularProgressIndicator(
+                                  backgroundColor: Colors.grey,
+                                  valueColor: AlwaysStoppedAnimation(Color(0xFF2a9d8f)),
+                                  strokeWidth: 10,
+                                );
                               }
                             }
                           )),
-                        Padding(padding: const EdgeInsets.only(left: 10, right: 10),),
-                        Tile(widget: Column(
+                        Padding(padding: const EdgeInsets.only(left: 16, right: 16),),
+                        Tile(
+                          onPressedFunction: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=> Assignments(data: assignments)));
+                          },
+                          widget: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
@@ -155,25 +134,67 @@ class _HomeState extends State<Home> {
                               ),
                             ),
                             Text(
-                              'Assignments Left',
-                              style: GoogleFonts.montserrat(
-                                color: Color(0xFF2a9d8f),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 20
-                              ),
+                              'Assignments Pending',
+                              style: textStyle20,
                               textAlign: TextAlign.center,
                             ),
                           ],
                         ))
                       ],
-                    )
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 26, bottom: 13),
+                      child: ElementTile(
+                        widget: Text(
+                          'Courses',
+                          style: textStyle26
+                        ),
+                        height: 80,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 13, bottom: 16),
+                      child: Text(
+                        'Scheduled Online Classes',
+                        style: textStyle26,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    DisabledElementTile(
+                      widget: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'No Online Classes Scheduled \nfor now',
+                            style: textStyle20,
+                            textAlign: TextAlign.center,
+                          ),
+                          Padding(padding: const EdgeInsets.only(top: 0.8)),
+                          Text(
+                            "(Doesn't Work For Now)",
+                            style: GoogleFonts.montserrat(
+                              color: Color(0xFF2a9d8f),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 10
+                            ),
+                            textAlign: TextAlign.center,
+                          )
+                        ],
+                      )
+                    ),
+                    Padding(padding: const EdgeInsets.only(top:10))
                   ],
                 ),
               ),
             );
           }
           else{
-            return Center(child: Text("Loading"));
+            return Center(
+              child: CircularProgressIndicator(
+              backgroundColor: Colors.grey,
+              valueColor: AlwaysStoppedAnimation(Color(0xFF2a9d8f)),
+              strokeWidth: 10,
+            ));
           }
         },
       ),
